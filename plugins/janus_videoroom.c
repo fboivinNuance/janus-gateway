@@ -2898,6 +2898,14 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	char error_cause[512];
 	json_t *root = message;
 	json_t *response = NULL;
+	int restricted = 0;
+
+	/* BB - If tokens are enabled, verify if this is a restricted user */
+	if(  session->handle->token ) {
+		if( strstr(session->handle->token, "RESTRICTED") ) {
+			restricted = 1;
+		}
+	}
 
 	/* BB - If tokens are enabled, verify if this is a restricted user */
 	int restricted = isRestricted(session->handle->token);
@@ -2939,15 +2947,6 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 				JANUS_VIDEOROOM_ERROR_MISSING_ELEMENT, JANUS_VIDEOROOM_ERROR_INVALID_ELEMENT, JANUS_VIDEOROOM_ERROR_UNAUTHORIZED);
 			if(error_code != 0)
 				goto prepare_response;
-		}
-		/* BB - If tokens are enabled, verify if this is a restricted user */
-		if(  session->handle->token ) {
-			if( strstr(session->handle->token, "RESTRICTED") ) {
-				// BB - if the token contains a "RESTRICTED" this user does not have the permission
-				// to create a conference room
-				error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
-				goto prepare_response;
-			}
 		}
 		json_t *desc = json_object_get(root, "description");
 		json_t *is_private = json_object_get(root, "is_private");
