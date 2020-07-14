@@ -2890,6 +2890,15 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 			if(error_code != 0)
 				goto prepare_response;
 		}
+		/* BB - If tokens are enabled, verify if this is a restricted user */
+		if(  session->handle->token ) {
+			if( strstr(session->handle->token, "RESTRICTED") ) {
+				// BB - if the token contains a "RESTRICTED" this user does not have the permission
+				// to create a conference room
+				error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+				goto prepare_response;
+			}
+		}
 		json_t *desc = json_object_get(root, "description");
 		json_t *is_private = json_object_get(root, "is_private");
 		json_t *req_pvtid = json_object_get(root, "require_pvtid");
