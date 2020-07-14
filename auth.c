@@ -144,7 +144,7 @@ gboolean janus_auth_check_signature_contains(const char *token, const char *real
 	gboolean result = FALSE;
 	int i = 2;
 	for(i = 2; data[i]; i++) {
-		if (!strcmp(desc, data[i])) {
+		if (strstr(data[i], desc)) {
 			result = TRUE;
 			break;
 		}
