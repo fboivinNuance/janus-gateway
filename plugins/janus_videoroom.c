@@ -2858,10 +2858,25 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	char error_cause[512];
 	json_t *root = message;
 	json_t *response = NULL;
+	int restricted = 0;
+
+	/* BB - If tokens are enabled, verify if this is a restricted user */
+	if(  session->handle->token ) {
+		if( strstr(session->handle->token, "RESTRICTED") ) {
+			restricted = 1;
+		}
+	}
 
 	if(!strcasecmp(request_text, "create")) {
 		/* Create a new VideoRoom */
 		JANUS_LOG(LOG_VERB, "Creating a new VideoRoom room\n");
+
+		/* BB - Restricted users cannot create rooms */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
+
 		JANUS_VALIDATE_JSON_OBJECT(root, create_parameters,
 			error_code, error_cause, TRUE,
 			JANUS_VIDEOROOM_ERROR_MISSING_ELEMENT, JANUS_VIDEOROOM_ERROR_INVALID_ELEMENT);
@@ -2889,15 +2904,6 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 				JANUS_VIDEOROOM_ERROR_MISSING_ELEMENT, JANUS_VIDEOROOM_ERROR_INVALID_ELEMENT, JANUS_VIDEOROOM_ERROR_UNAUTHORIZED);
 			if(error_code != 0)
 				goto prepare_response;
-		}
-		/* BB - If tokens are enabled, verify if this is a restricted user */
-		if(  session->handle->token ) {
-			if( strstr(session->handle->token, "RESTRICTED") ) {
-				// BB - if the token contains a "RESTRICTED" this user does not have the permission
-				// to create a conference room
-				error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
-				goto prepare_response;
-			}
 		}
 		json_t *desc = json_object_get(root, "description");
 		json_t *is_private = json_object_get(root, "is_private");
@@ -3331,6 +3337,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	} else if(!strcasecmp(request_text, "edit")) {
 		/* Edit the properties for an existing VideoRoom */
 		JANUS_LOG(LOG_VERB, "Attempt to edit the properties of an existing VideoRoom room\n");
+
+		/* BB - Restricted users cannot edit rooms */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		if(!string_ids) {
 			JANUS_VALIDATE_JSON_OBJECT(root, room_parameters,
 				error_code, error_cause, TRUE,
@@ -3499,6 +3511,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "destroy")) {
 		JANUS_LOG(LOG_VERB, "Attempt to destroy an existing VideoRoom room\n");
+
+		/* BB - Restricted users cannot destroy rooms */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		if(!string_ids) {
 			JANUS_VALIDATE_JSON_OBJECT(root, room_parameters,
 				error_code, error_cause, TRUE,
@@ -3596,6 +3614,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "list")) {
 		/* List all rooms (but private ones) and their details (except for the secret, of course...) */
+
+		/* BB - Restricted users cannot list rooms */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		JANUS_LOG(LOG_VERB, "Getting the list of VideoRoom rooms\n");
 		gboolean lock_room_list = TRUE;
 		if(admin_key != NULL) {
@@ -4165,6 +4189,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		json_object_set_new(response, "exists", room_exists ? json_true() : json_false());
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "allowed")) {
+
+		/* BB - Restricted users cannot edit the list of allowed participants */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		JANUS_LOG(LOG_VERB, "Attempt to edit the list of allowed participants in an existing VideoRoom room\n");
 		if(!string_ids) {
 			JANUS_VALIDATE_JSON_OBJECT(root, room_parameters,
@@ -4281,6 +4311,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "kick")) {
 		JANUS_LOG(LOG_VERB, "Attempt to kick a participant from an existing VideoRoom room\n");
+
+		/* BB - Restricted users cannot kick participants */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		if(!string_ids) {
 			JANUS_VALIDATE_JSON_OBJECT(root, room_parameters,
 				error_code, error_cause, TRUE,
@@ -4411,6 +4447,13 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "listparticipants")) {
 		/* List all participants in a room, specifying whether they're publishers or just attendees */
+
+		/* BB - Restricted users cannot list participants */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
+
 		if(!string_ids) {
 			JANUS_VALIDATE_JSON_OBJECT(root, room_parameters,
 				error_code, error_cause, TRUE,
@@ -4570,6 +4613,12 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 		json_object_set_new(response, "rtp_forwarders", list);
 		goto prepare_response;
 	} else if(!strcasecmp(request_text, "enable_recording")) {
+
+		/* BB - Restricted users cannot enable or disable recording */
+		if(restricted) {
+			error_code = JANUS_VIDEOROOM_ERROR_UNAUTHORIZED;
+			goto prepare_response;
+		}
 		JANUS_VALIDATE_JSON_OBJECT(root, record_parameters,
 			error_code, error_cause, TRUE,
 			JANUS_VIDEOROOM_ERROR_MISSING_ELEMENT, JANUS_VIDEOROOM_ERROR_INVALID_ELEMENT);
