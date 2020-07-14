@@ -26,6 +26,10 @@ Makefile.in
 /compile
 /install-sh
 /ltmain.sh
+.autotools
+.cproject
+.project
+.settings/
 
 /config.log
 /config.guess
