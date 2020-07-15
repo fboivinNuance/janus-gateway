@@ -144,7 +144,7 @@ gboolean janus_auth_check_signature_contains(const char *token, const char *real
 	gboolean result = FALSE;
 	int i = 2;
 	for(i = 2; data[i]; i++) {
-		// BB change instead of verbatim check, verify if the token plugin list contains a superset of the
+		// BB instead of verbatim check verify if the token plugin list contains a superset of the
 		// plugin name
 		if (strstr(data[i], desc)) {
 			result = TRUE;
