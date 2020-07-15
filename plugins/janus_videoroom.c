@@ -2833,10 +2833,10 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 		/* signed tokens bypass pin validation */
 		json_t *token = json_object_get(root, "token");
 
-		// BB - experimental
+		/* BB - experimental */
 		char* token_str = json_string_value(token);
 		JANUS_LOG(LOG_ERR, "Token, token (%s)\n", token_str);
-		// BB
+		/* BB - ends */
 
 		if(token) {
 			char room_descriptor[26];

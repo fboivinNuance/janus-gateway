@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <inttypes.h>
+#include <ctype.h> //BB
 
 #include <zlib.h>
 
@@ -1195,3 +1196,28 @@ size_t janus_gzip_compress(int compression, char *text, size_t tlen, char *compr
 	return zs.total_out;
 }
 #endif
+
+/* BB - start */
+/* Converts an integer value to its hex character*/
+unsigned char to_hex(unsigned char code) {
+  static char hex[] = "0123456789abcdef";
+  return hex[code & 15];
+}
+
+unsigned char *url_encode(unsigned char *str, int l) {
+  unsigned char *pstr = str, *buf = malloc( (l * 3) + 1), *pbuf = buf;
+  while (*pstr) {
+    if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
+      *pbuf++ = *pstr;
+    else if (*pstr == ' ')
+      *pbuf++ = '+';
+    else
+      *pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
+    pstr++;
+  }
+  *pbuf = '\0';
+  return buf;
+}
+/* BB - ends */
+
+
