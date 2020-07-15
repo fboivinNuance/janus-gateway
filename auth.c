@@ -107,11 +107,11 @@ gboolean janus_auth_check_signature(const char *token, const char *realm) {
 	unsigned char signature[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	HMAC(EVP_sha1(), auth_secret, strlen(auth_secret), (const unsigned char*)parts[0], strlen(parts[0]), signature, &len);
-	gchar *base64 = g_base64_encode(signature, len);
-	gboolean result = janus_strcmp_const_time(parts[1], base64);
+	unsigned char *urlEncoded = url_encode(signature, len);      //BB - replace base64 by URL encoding
+	gboolean result = janus_strcmp_const_time(parts[1], urlEncoded);
 	g_strfreev(data);
 	g_strfreev(parts);
-	g_free(base64);
+	free(urlEncoded); // BB - replaced g_free by free
 	return result;
 
 fail:
@@ -157,7 +157,7 @@ gboolean janus_auth_check_signature_contains(const char *token, const char *real
 	unsigned char signature[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	HMAC(EVP_sha1(), auth_secret, strlen(auth_secret), (const unsigned char*)parts[0], strlen(parts[0]), signature, &len);
-	unsigned char *urlEncoded = url_encode(signature, len); // BB URL encode insetead of base64 encode
+	unsigned char *urlEncoded = url_encode(signature, len); // BB URL encode instead of base64 encode
 	result = janus_strcmp_const_time(parts[1], urlEncoded);
 	g_strfreev(data);
 	g_strfreev(parts);
