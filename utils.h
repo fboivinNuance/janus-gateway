@@ -383,4 +383,9 @@ void janus_set4(guint8 *data, size_t i, guint32 val);
  */
 size_t janus_gzip_compress(int compression, char *text, size_t tlen, char *compressed, size_t zlen);
 
+/* BB - Added */
+/* Returns a url-encoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+unsigned char *url_encode(unsigned char *str, int l);
+
 #endif
