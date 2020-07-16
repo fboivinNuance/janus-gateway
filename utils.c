@@ -1199,13 +1199,13 @@ size_t janus_gzip_compress(int compression, char *text, size_t tlen, char *compr
 
 /* BB - start */
 void base64ToUrlNoPadding(char *str) {
-	for(; *str != 0; str++ ) {
-		if(*str == '+') {
-			*str = '-';
-		} else if (*str == '/') {
-			*str = '_';
-		} else if(*str == '=') {
-			*str = 0;
+	for(size_t i = 0; i < strlen(str); i++ ) {
+		if(str[i] == '+') {
+			str[i] = '-';
+		} else if (str[i] == '/') {
+			str[i] = '_';
+		} else if(str[i] == '=') {
+			str[i] = 0;
 			break;
 		}
 	}
