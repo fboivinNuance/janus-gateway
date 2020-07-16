@@ -107,11 +107,12 @@ gboolean janus_auth_check_signature(const char *token, const char *realm) {
 	unsigned char signature[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	HMAC(EVP_sha1(), auth_secret, strlen(auth_secret), (const unsigned char*)parts[0], strlen(parts[0]), signature, &len);
-	unsigned char *urlEncoded = url_encode(signature, len);      //BB - replace base64 by URL encoding
-	gboolean result = janus_strcmp_const_time(parts[1], urlEncoded);
+	gchar *base64 = g_base64_encode(signature, len);
+	base64ToUrlNoPadding(base64);
+	gboolean result = janus_strcmp_const_time(parts[1], base64);
 	g_strfreev(data);
 	g_strfreev(parts);
-	free(urlEncoded); // BB - replaced g_free by free
+	g_free(base64);
 	return result;
 
 fail:
@@ -144,7 +145,7 @@ gboolean janus_auth_check_signature_contains(const char *token, const char *real
 	gboolean result = FALSE;
 	int i = 2;
 	for(i = 2; data[i]; i++) {
-		// BB instead of verbatim check verify if the token plugin list contains a superset of the
+		// BB change instead of verbatim check, verify if the token plugin list contains a superset of the
 		// plugin name
 		if (strstr(data[i], desc)) {
 			result = TRUE;
@@ -157,11 +158,12 @@ gboolean janus_auth_check_signature_contains(const char *token, const char *real
 	unsigned char signature[EVP_MAX_MD_SIZE];
 	unsigned int len;
 	HMAC(EVP_sha1(), auth_secret, strlen(auth_secret), (const unsigned char*)parts[0], strlen(parts[0]), signature, &len);
-	unsigned char *urlEncoded = url_encode(signature, len); // BB URL encode instead of base64 encode
-	result = janus_strcmp_const_time(parts[1], urlEncoded);
+	gchar *base64 = g_base64_encode(signature, len);
+	base64ToUrlNoPadding(base64);
+	result = janus_strcmp_const_time(parts[1], base64);
 	g_strfreev(data);
 	g_strfreev(parts);
-	free(urlEncoded); // BB - free instead of g_free
+	g_free(base64);
 	return result;
 
 fail:
