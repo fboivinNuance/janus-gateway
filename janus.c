@@ -941,6 +941,14 @@ int janus_process_incoming_request(janus_request *request) {
 	int error_code = 0;
 	char error_cause[100];
 	json_t *root = request->message;
+
+	/* BB - experimental */
+	json_t *token = json_object_get(root, "token");
+	char* token_str = json_string_value(token);
+	JANUS_LOG(LOG_ERR, "In janus_process_incoming_request Token, token (%s)\n", token_str);
+
+
+
 	/* Ok, let's start with the ids */
 	guint64 session_id = 0, handle_id = 0;
 	json_t *s = json_object_get(root, "session_id");

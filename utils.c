@@ -1198,7 +1198,7 @@ size_t janus_gzip_compress(int compression, char *text, size_t tlen, char *compr
 #endif
 
 /* BB - start */
-void base64ToUrlNoPadding(char *str) {
+void base64ToBase64UrlNoPadding(char *str) {
 	for(; *str != 0; str++ ) {
 		if(*str == '+') {
 			*str = '-';
