@@ -943,11 +943,9 @@ int janus_process_incoming_request(janus_request *request) {
 	json_t *root = request->message;
 
 	/* BB - experimental */
-	json_t *token = json_object_get(root, "token");
+	json_t *token = json_object_get(root, "room");
 	char* token_str = json_string_value(token);
-	JANUS_LOG(LOG_ERR, "In janus_process_incoming_request Token, token (%s)\n", token_str);
-
-
+	JANUS_LOG(LOG_ERR, "In janus_process_incoming_request - Room, room (%s)\n", token_str);
 
 	/* Ok, let's start with the ids */
 	guint64 session_id = 0, handle_id = 0;
@@ -1562,6 +1560,16 @@ int janus_process_incoming_request(janus_request *request) {
 			if(janus_flags_is_set(&handle->webrtc_flags, JANUS_ICE_HANDLE_WEBRTC_E2EE))
 				json_object_set_new(body_jsep, "e2ee", json_true());
 		}
+
+		/* signed tokens bypass pin validation */
+		token = json_object_get(root, "token");
+
+		/* BB - experimental */
+		char* token_str = json_string_value(token);
+		JANUS_LOG(LOG_ERR, "In  - Token, token (%s)\n", token_str);
+		/* BB - ends */
+
+
 		janus_plugin_result *result = plugin_t->handle_message(handle->app_handle,
 			g_strdup((char *)transaction_text), body, body_jsep);
 		g_free(jsep_type);
