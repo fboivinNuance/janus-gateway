@@ -6200,8 +6200,7 @@ static void *janus_videoroom_handler(void *data) {
 					if((!publisher->audio || !subscriber->audio_offered) &&
 							(!publisher->video || !subscriber->video_offered) &&
 							(!publisher->data || !subscriber->data_offered)) {
-						g_free(subscriber);
-						if (owner) {
+						if(owner) {
 							janus_refcount_decrease(&owner->session->ref);
 							janus_refcount_decrease(&owner->ref);
 						}
@@ -6212,6 +6211,7 @@ static void *janus_videoroom_handler(void *data) {
 						g_snprintf(error_cause, 512, "Can't offer an SDP with no audio, video or data");
 						janus_mutex_unlock(&sessions_mutex);
 						janus_refcount_decrease(&subscriber->room->ref);
+						g_free(subscriber);
 						goto error;
 					}
 					subscriber->audio = audio ? json_is_true(audio) : TRUE;	/* True by default */
