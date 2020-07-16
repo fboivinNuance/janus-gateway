@@ -2835,7 +2835,7 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 
 		/* BB - experimental */
 		char* token_str = json_string_value(token);
-		JANUS_LOG(LOG_ERR, "Token, token (%s)\n", token_str);
+		JANUS_LOG(LOG_ERR, "In janus_videoroom_access_room - Token, token (%s)\n", token_str);
 		/* BB - ends */
 
 		if(token) {
