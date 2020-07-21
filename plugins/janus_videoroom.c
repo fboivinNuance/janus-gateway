@@ -2833,11 +2833,6 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 		/* signed tokens bypass pin validation */
 		json_t *token = json_object_get(root, "token");
 
-		/* BB - experimental */
-		char* token_str = json_string_value(token);
-		JANUS_LOG(LOG_ERR, "In janus_videoroom_access_room - Token, token (%s)\n", token_str);
-		/* BB - ends */
-
 		if(token) {
 			char room_descriptor[26];
 			g_snprintf(room_descriptor, sizeof(room_descriptor), "room=%s", room_id_str);
@@ -2854,6 +2849,45 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 	return 0;
 }
 
+/*
+ * BB - Added function to verify if the token name contains the 'RESTRICTED' keyword.
+ * If it contains the RESTRICTED key word return TRUE and in any other case we return FALSE.
+ */
+gboolean isRestricted(char* token) {
+
+	gboolean result = FALSE;
+
+	if(token) {
+		/* Split the token into two parts, the token and the signature */
+		gchar **parts = g_strsplit(token, ":", 2);
+		gchar **data = NULL;
+
+		/* Verify if the token is present */
+		if(parts[0]) {
+
+			/* Split the token content */
+			data = g_strsplit(parts[0], ",", 0);
+
+			for(int i = 0; data[i]; i++) {
+				/* Let's check if we have the package name */
+				if (strstr(data[i], JANUS_VIDEOROOM_PACKAGE)) {
+					/* Let's verify if it contains the 'RESTRICTED' keyword */
+					if(strstr(data[i], "RESTRICTED")) {
+						result = TRUE;
+					}
+					break;
+				}
+			}
+		}
+		g_strfreev(data);
+		g_strfreev(parts);
+	}
+
+	return result;
+}
+
+
+
 /* Helper method to process synchronous requests */
 static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_session *session, json_t *message) {
 	json_t *request = json_object_get(message, "request");
@@ -2864,14 +2898,9 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	char error_cause[512];
 	json_t *root = message;
 	json_t *response = NULL;
-	int restricted = 0;
 
 	/* BB - If tokens are enabled, verify if this is a restricted user */
-	if(  session->handle->token ) {
-		if( strstr(session->handle->token, "RESTRICTED") ) {
-			restricted = 1;
-		}
-	}
+	int restricted = isRestricted(session->handle->token);
 
 	if(!strcasecmp(request_text, "create")) {
 		/* Create a new VideoRoom */
