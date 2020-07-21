@@ -2898,14 +2898,9 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	char error_cause[512];
 	json_t *root = message;
 	json_t *response = NULL;
-	int restricted = 0;
 
 	/* BB - If tokens are enabled, verify if this is a restricted user */
-	if(  session->handle->token ) {
-		if( strstr(session->handle->token, "RESTRICTED") ) {
-			restricted = 1;
-		}
-	}
+	int restricted = isRestricted(session->handle->token);
 
 	/* BB - If tokens are enabled, verify if this is a restricted user */
 	int restricted = isRestricted(session->handle->token);
