@@ -2902,9 +2902,6 @@ static json_t *janus_videoroom_process_synchronous_request(janus_videoroom_sessi
 	/* BB - If tokens are enabled, verify if this is a restricted user */
 	int restricted = isRestricted(session->handle->token);
 
-	/* BB - If tokens are enabled, verify if this is a restricted user */
-	int restricted = isRestricted(session->handle->token);
-
 	if(!strcasecmp(request_text, "create")) {
 		/* Create a new VideoRoom */
 		JANUS_LOG(LOG_VERB, "Creating a new VideoRoom room\n");
