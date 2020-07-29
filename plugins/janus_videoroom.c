@@ -2831,6 +2831,13 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 	if(check_join) {
 		char error_cause2[100];
 		/* signed tokens bypass pin validation */
+
+		/* BB - Commented out buggy token validation
+		 * Token is always null as the janus.c (core) provides only the "message" portion of the request that
+		 * does not contain the token hence  the "if" below is never entered. The processing intended by
+		 * the below implementation is specific to the HMAC signed tokens hence it wouldn't work with
+		 * other types of tokens
+
 		json_t *token = json_object_get(root, "token");
 
 		if(token) {
@@ -2839,6 +2846,7 @@ static int janus_videoroom_access_room(json_t *root, gboolean check_modify, gboo
 			if(gateway->auth_signature_contains(&janus_videoroom_plugin, json_string_value(token), room_descriptor))
 				return 0;
 		}
+		*/
 		JANUS_CHECK_SECRET((*videoroom)->room_pin, root, "pin", error_code, error_cause2,
 			JANUS_VIDEOROOM_ERROR_MISSING_ELEMENT, JANUS_VIDEOROOM_ERROR_INVALID_ELEMENT, JANUS_VIDEOROOM_ERROR_UNAUTHORIZED);
 		if(error_code != 0) {
