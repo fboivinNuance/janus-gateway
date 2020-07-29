@@ -3658,10 +3658,19 @@ void janus_ice_resend_trickles(janus_ice_handle *handle) {
 			nice_candidate_free(c);
 			continue;
 		}
+<<<<<<< HEAD
+		if(janus_ice_candidate_to_string(handle, c, buffer, sizeof(buffer), FALSE, FALSE) == 0) {
+			/* Candidate encoded, send a "trickle" event to the browser */
+			janus_ice_notify_trickle(handle, buffer);
+			/* If nat-1-1 is enabled but we want to keep the private host, add another candidate */
+			if(nat_1_1_enabled && keep_private_host &&
+					janus_ice_candidate_to_string(handle, c, buffer, sizeof(buffer), FALSE, TRUE) == 0) {
+=======
 
 		guint public_ip_index = 0;
 		do {
 			if(janus_ice_candidate_to_string(handle, c, buffer, sizeof(buffer), FALSE, FALSE, public_ip_index) == 0) {
+>>>>>>> bb0ab0931644599e05c72acbfd1e759761242023
 				/* Candidate encoded, send a "trickle" event to the browser */
 				janus_ice_notify_trickle(handle, buffer);
 				/* If nat-1-1 is enabled but we want to keep the private host, add another candidate */

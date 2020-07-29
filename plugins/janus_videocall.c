@@ -391,6 +391,7 @@ typedef struct janus_videocall_session {
 	volatile gint dataready;
 	volatile gint hangingup;
 	volatile gint destroyed;
+	janus_mutex mutex;
 	janus_refcount ref;
 } janus_videocall_session;
 static GHashTable *sessions = NULL, *usernames = NULL;
@@ -593,6 +594,7 @@ void janus_videocall_create_session(janus_plugin_session *handle, int *error) {
 	janus_rtp_switching_context_reset(&session->context);
 	janus_rtp_simulcasting_context_reset(&session->sim_context);
 	janus_vp8_simulcast_context_reset(&session->vp8_context);
+	janus_mutex_init(&session->mutex);
 	janus_mutex_init(&session->rec_mutex);
 	g_atomic_int_set(&session->incall, 0);
 	g_atomic_int_set(&session->hangingup, 0);
@@ -994,6 +996,7 @@ static void janus_videocall_hangup_media_internal(janus_plugin_session *handle) 
 	janus_mutex_lock(&session->rec_mutex);
 	janus_videocall_recorder_close(session);
 	janus_mutex_unlock(&session->rec_mutex);
+	janus_mutex_lock(&session->mutex);
 	janus_videocall_session *peer = session->peer;
 	session->peer = NULL;
 	if(peer) {
@@ -1016,7 +1019,9 @@ static void janus_videocall_hangup_media_internal(janus_plugin_session *handle) 
 			json_object_set_new(info, "reason", json_string("Remote WebRTC hangup"));
 			gateway->notify_event(&janus_videocall_plugin, peer->handle, info);
 		}
+		janus_refcount_decrease(&peer->ref);
 	}
+	janus_mutex_unlock(&session->mutex);
 	/* Reset controls */
 	session->has_audio = FALSE;
 	session->has_video = FALSE;
@@ -1270,8 +1275,14 @@ static void *janus_videocall_handler(void *data) {
 				}
 				janus_sdp_destroy(offer);
 				g_atomic_int_set(&peer->incall, 1);
+				janus_refcount_increase(&session->ref);
+				janus_refcount_increase(&peer->ref);
+				janus_mutex_lock(&session->mutex);
 				session->peer = peer;
+				janus_mutex_unlock(&session->mutex);
+				janus_mutex_lock(&peer->mutex);
 				peer->peer = session;
+				janus_mutex_unlock(&session->mutex);
 				session->has_audio = (strstr(msg_sdp, "m=audio") != NULL);
 				session->has_video = (strstr(msg_sdp, "m=video") != NULL);
 				session->has_data = (strstr(msg_sdp, "DTLS/SCTP") != NULL);
