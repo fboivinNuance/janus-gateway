@@ -4103,7 +4103,7 @@ gint main(int argc, char *argv[])
 	core_limits.rlim_cur = core_limits.rlim_max = RLIM_INFINITY;
 	setrlimit(RLIMIT_CORE, &core_limits);
 
-	g_print("Janus commit: %s\n", janus_build_git_sha);
+	g_print("Fred's Janus commit: %s\n", janus_build_git_sha);
 	g_print("Compiled on:  %s\n\n", janus_build_git_time);
 
 	struct gengetopt_args_info args_info;
